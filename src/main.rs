@@ -2,33 +2,24 @@ use std::sync::Arc;
 
 mod mutex;
 
-static mut SUM: u64 = 0;
-
 fn main() {
-    let spin_lock = Arc::new(mutex::SpinLock::new());
-    let spin_lock_other = spin_lock.clone();
+    let spin_lock = Arc::new(mutex::SpinLock::new(0));
+    let spin_lock_first = spin_lock.clone();
+    let spin_lock_second = spin_lock.clone();
 
     let th1 = std::thread::spawn(move || {
         for _ in 0..10000000 {
-            spin_lock.lock();
-            unsafe {
-                SUM += 1;
-            }
-            spin_lock.unlock();
+            let mut guard = spin_lock_first.guard();
+            *guard += 1;
         }
     });
     let th2 = std::thread::spawn(move || {
         for _ in 0..10000000 {
-            spin_lock_other.lock();
-            unsafe {
-                SUM += 1;
-            }
-            spin_lock_other.unlock();
+            let mut guard = spin_lock_second.guard();
+            *guard += 1;
         }
     });
     let _ = th1.join();
     let _ = th2.join();
-    unsafe {
-        println!("sum = {}", SUM);
-    }
+    println!("sum = {}", *spin_lock.guard());
 }
