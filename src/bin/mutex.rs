@@ -55,8 +55,8 @@ impl<T> SpinLockTicket<T> {
         }
     }
     fn lock(&self) {
-        let ticket = self.ticket.fetch_add(1, Acquire);
-        while self.owner_ticket.load(Relaxed) != ticket {}
+        let ticket = self.ticket.fetch_add(1, Relaxed);
+        while self.owner_ticket.load(Acquire) != ticket {}
     }
     fn unlock(&self) {
         self.owner_ticket.fetch_add(1, Release);
