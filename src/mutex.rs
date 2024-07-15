@@ -105,7 +105,11 @@ impl<T> SpinLock<T> {
         }
     }
     fn lock(&self) {
-        while self.lock.compare_exchange_weak(false, true, Acquire, Relaxed).is_err() {
+        while self
+            .lock
+            .compare_exchange_weak(false, true, Acquire, Relaxed)
+            .is_err()
+        {
             while self.lock.load(Relaxed) {
                 std::hint::spin_loop();
             }
