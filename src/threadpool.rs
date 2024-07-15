@@ -1,11 +1,7 @@
-use std::{collections::VecDeque, thread::JoinHandle};
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering::Relaxed},
-        Arc, Mutex,
-    },
-    time::Duration,
+use std::sync::{
+    Arc, Condvar, Mutex,
 };
+use std::{collections::VecDeque, thread::JoinHandle};
 
 type Task = Box<dyn FnOnce() + Send + 'static>;
 
@@ -13,7 +9,7 @@ pub struct ThreadPool {
     size: usize,
     workers: Vec<JoinHandle<()>>,
     queue: Arc<Mutex<VecDeque<Task>>>,
-    is_stop: Arc<AtomicBool>,
+    not_empty: Arc<Condvar>,
 }
 
 impl ThreadPool {
@@ -22,48 +18,33 @@ impl ThreadPool {
             size,
             workers: vec![],
             queue: Default::default(),
-            is_stop: Arc::new(AtomicBool::new(false)),
+            not_empty: Arc::new(Condvar::new()),
         }
     }
     pub fn run(&mut self) {
         for _ in 0..self.size {
             let queue = Arc::clone(&self.queue);
-            let is_stop = Arc::clone(&self.is_stop);
-            self.workers.push(std::thread::spawn(move || {
-                while !is_stop.load(Relaxed) {
-                    let mut guard = queue.lock().unwrap();
+            let not_empty = Arc::clone(&self.not_empty);
+            self.workers.push(std::thread::spawn(move || loop {
+                let mut guard = queue.lock().unwrap();
+                let task = loop {
                     if let Some(task) = guard.pop_front() {
-                        drop(guard);
-                        task();
+                        break task;
                     } else {
-                        drop(guard);
-                        std::thread::sleep(Duration::from_millis(10));
+                        guard = not_empty.wait(guard).unwrap();
                     }
-                }
+                };
+                drop(guard);
+                task();
             }));
         }
     }
     pub fn submit(&mut self, func: Task) {
         let mut guard = self.queue.lock().unwrap();
         guard.push_back(func);
-    }
-    pub fn stop(&mut self) {
-        self.is_stop.store(true, Relaxed);
-        while !self.workers.is_empty() {
-            let worker = self.workers.pop().unwrap();
-            worker.join().unwrap();
-        }
-        println!("ThreadPool is stopped");
+        self.not_empty.notify_one();
     }
     pub fn wait(&self) {
         while !self.queue.lock().unwrap().is_empty() {}
-    }
-}
-
-impl Drop for ThreadPool {
-    fn drop(&mut self) {
-        if !self.is_stop.load(Relaxed) {
-            self.stop();
-        }
     }
 }

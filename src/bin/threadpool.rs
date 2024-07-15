@@ -22,7 +22,6 @@ fn main() {
         unsafe { COUNTER },
         start.elapsed().as_millis()
     );
-    pool.stop();
 }
 
 fn random(seed: u32) -> impl Iterator<Item = u32> {
