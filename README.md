@@ -1,15 +1,16 @@
-# Эксперименты с многопоточным програмированием
+### Experiments with multithreaded and concurrent programming
 
-### Сравнение блокировок:
+### Comparison of locks (src/mutex.rs and bin/mutex):
 
-| Блокировка     |Время выполнения|
+| Lock           | Execution time |
 | -------------- | -------------  |
 | SpinlockTicket |     701 ms     |
 | Mutex          |     250 ms     |
 | Spinlock       |     108 ms     |
 
-### ThreadPool:
-| Потоков        |Время выполнения|
+### Threadpool efficiency (src/threadpool.rs ans bin/threadpool.rs):
+
+| Count threads  | Execution time |
 | -------------- | -------------  |
 | 1              |     17712 ms   |
 | 6              |     3590 ms    |
