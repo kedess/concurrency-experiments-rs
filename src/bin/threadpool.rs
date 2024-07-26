@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use concurrency_experiments_rs::threadpool::ThreadPool;
+use concurrency_rs::threadpool::ThreadPool;
 
 static mut COUNTER: u32 = 0;
 

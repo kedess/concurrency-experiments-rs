@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use concurrency_experiments_rs::mutex::{SpinLock, SpinLockTicket};
+use concurrency_rs::mutex::{SpinLock, SpinLockTicket};
 
 fn main() {
     let mut spinlock_ticket_time = u128::MAX;

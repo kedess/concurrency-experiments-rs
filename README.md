@@ -1,6 +1,9 @@
-### Experiments with multithreaded and concurrent programming
+### Примеры конкурентного программирования на Rust
 
-- Comparison of locks (src/mutex.rs and src/bin/mutex):
+- Блокировки (locks) на атомарных переменных:
+
+src/mutex.rs - реализация spinlock и spinlockticket (спинлок c билетами) на атомарных переменных.
+src/bin/mutex - тестирование быстродействия данных блокировок с мютексом. Алгоритм заключается в подсчете счетчика при попеременном переключении между 2 потоками
 
 | Lock           | Execution time |
 | -------------- | -------------  |
@@ -8,13 +11,20 @@
 | Mutex          |     250 ms     |
 | Spinlock       |     108 ms     |
 
-- Threadpool efficiency (src/threadpool.rs and src/bin/threadpool.rs):
+- Пул потоков (Threadpool) efficiency ( and ):
+
+src/threadpool.rs - реализация пула потоков
+src/bin/threadpool.rs - тестирования производительности пула потоков.
 
 | Count threads  | Execution time |
 | -------------- | -------------  |
 | 1              |     17712 ms   |
 | 6              |     3590 ms    |
 
-- Examples lazy static (src/bin.lazy.rs)
+- Примеры отложенной инициализации (lazy static):
 
-- Generator ID (src/bin/generatorid.rs)
+src/bin.lazy.rs - непосредственно примеры, с использование Once, OnceLock и с применением атомарных переменных
+
+- Потокобезопасный генератор ID на атомарной переменной (Generator ID):
+
+src/bin/generatorid.rs - непосредственно пример генератора
