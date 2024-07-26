@@ -3,17 +3,21 @@
 - Блокировки (locks) на атомарных переменных:
 
 src/mutex.rs - реализация spinlock и spinlockticket (спинлок c билетами) на атомарных переменных.
-src/bin/mutex - тестирование быстродействия данных блокировок с мютексом. Алгоритм заключается в подсчете счетчика при попеременном переключении между 2 потоками
 
-| Lock           | Execution time |
-| -------------- | -------------  |
-| SpinlockTicket |     701 ms     |
-| Mutex          |     250 ms     |
-| Spinlock       |     108 ms     |
+src/bin/mutex - тестирование быстродействия данных блокировок с мютексом. Алгоритм заключается в подсчете счетчика при попеременном переключении между 2 потоками,
+в тест также добавлена реализация mutex на атомарных переменных (mutex on atomic)
 
-- Пул потоков (Threadpool) efficiency ( and ):
+| Lock            | Execution time |
+| --------------- | -------------  |
+| SpinlockTicket  |     701 ms     |
+| Mutex           |     250 ms     |
+| Mutex on atomic |     250 ms     |
+| Spinlock        |     108 ms     |
+
+- Пул потоков (Threadpool):
 
 src/threadpool.rs - реализация пула потоков
+
 src/bin/threadpool.rs - тестирования производительности пула потоков.
 
 | Count threads  | Execution time |
