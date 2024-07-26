@@ -62,43 +62,30 @@ fn main() {
         mutex_time = std::cmp::min(mutex_time, start.elapsed().as_millis());
 
         let start = std::time::Instant::now();
+        unsafe {
+            DATA = 0;
+        }
         std::thread::scope(|s| {
             s.spawn(|| {
-                for _ in 0..10000000 / 2 {
-                    if LOCKED
-                        .compare_exchange(
-                            false,
-                            true,
-                            std::sync::atomic::Ordering::Acquire,
-                            std::sync::atomic::Ordering::Relaxed,
-                        )
-                        .is_ok()
-                    {
-                        unsafe {
-                            DATA += 1;
-                        }
+                let mut cnt = 10000000 / 2;
+                while cnt > 0 {
+                    if LOCKED.swap(true, std::sync::atomic::Ordering::Acquire) == false {
+                        unsafe { DATA += 1 };
+                        cnt -= 1;
                         LOCKED.store(false, std::sync::atomic::Ordering::Release);
                     }
                 }
             });
-            for _ in 0..10000000 / 2 {
-                if LOCKED
-                    .compare_exchange(
-                        false,
-                        true,
-                        std::sync::atomic::Ordering::Acquire,
-                        std::sync::atomic::Ordering::Relaxed,
-                    )
-                    .is_ok()
-                {
-                    unsafe {
-                        DATA += 1;
-                    }
+            let mut cnt = 10000000 / 2;
+            while cnt > 0 {
+                if LOCKED.swap(true, std::sync::atomic::Ordering::Acquire) == false {
+                    unsafe { DATA += 1 };
+                    cnt -= 1;
                     LOCKED.store(false, std::sync::atomic::Ordering::Release);
                 }
             }
         });
-        assert_eq!(10000000, *mutex.lock().unwrap());
+        assert_eq!(10000000, unsafe { DATA });
         mutex_time_atomic = std::cmp::min(mutex_time_atomic, start.elapsed().as_millis());
     }
 
