@@ -83,4 +83,43 @@ fn main() {
     });
     th1.join().unwrap();
     th2.join().unwrap();
+
+    let mut value_time = u128::MAX;
+    let mut value_atomic_time = u128::MAX;
+    let mut reference_time = u128::MAX;
+    let mut reference_atomic_time = u128::MAX;
+
+    for _ in 0..10 {
+        let start = std::time::Instant::now();
+        for _ in 0..100000000 {
+            let map = lazy_init_ref();
+            assert_eq!(1, *map.get(&1).unwrap());
+        }
+        reference_time = std::cmp::min(reference_time, start.elapsed().as_millis());
+
+        let start = std::time::Instant::now();
+        for _ in 0..100000000 {
+            let map = lazy_init_ref_atomic();
+            assert_eq!(1, *map.get(&1).unwrap());
+        }
+        reference_atomic_time = std::cmp::min(reference_atomic_time, start.elapsed().as_millis());
+
+        let start = std::time::Instant::now();
+        for _ in 0..100000000 {
+            let value = lazy_init_value();
+            assert_eq!(1, value);
+        }
+        value_time = std::cmp::min(value_time, start.elapsed().as_millis());
+
+        let start = std::time::Instant::now();
+        for _ in 0..100000000 {
+            let value = lazy_init_value_atomic();
+            assert_eq!(1, value);
+        }
+        value_atomic_time = std::cmp::min(value_atomic_time, start.elapsed().as_millis());
+    }
+    println!("OnceLock = elapsed {} ms", reference_time);
+    println!("Atomic reference = elapsed {} ms", reference_atomic_time);
+    println!("Once = elapsed {} ms", value_time);
+    println!("Atomic value = elapsed {} ms", value_atomic_time);
 }
