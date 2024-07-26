@@ -38,11 +38,10 @@ src/bin.lazy.rs - непосредственно примеры, с исполь
 
 - Потокобезопасный генератор ID на атомарной переменной (Generator ID):
 
-| Used primitive         | Execution time |
+| Generator              | Execution time |
 | ---------------------- | -------------  |
-| Once                   |     76 ms      |
-| AtomicU64              |     76 ms      |
-| OnceLock (reference)   |     843 ms     |
-| AtomicPtr (reference)  |     891 ms     |
+| Simple atomic          |     293 ms     |
+| Atomic with check      |     688 ms     |
+| Used mutex             |     571 ms     |
 
-src/bin/generatorid.rs - непосредственно пример генератора
+src/bin/generatorid.rs - непосредственно пример генератора и тесты производительности
