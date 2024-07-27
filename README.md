@@ -34,6 +34,7 @@ src/bin.lazy.rs - непосредственно примеры, с исполь
 | Once                   |     76 ms      |
 | AtomicU64              |     76 ms      |
 | OnceLock (reference)   |     843 ms     |
+| LazyLock (reference)   |     843 ms     |
 | AtomicPtr (reference)  |     891 ms     |
 
 - Потокобезопасный генератор ID на атомарной переменной (Generator ID):

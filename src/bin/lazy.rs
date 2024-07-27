@@ -6,6 +6,15 @@ use std::{
     sync::{Once, OnceLock},
 };
 
+use std::sync::LazyLock;
+
+static DICT: LazyLock<HashMap<i32, i32>> = LazyLock::new(|| {
+    let mut map = HashMap::new();
+    map.insert(1, 1);
+    map.insert(2, 2);
+    map
+});
+
 static mut VALUE: usize = 0;
 static INIT: Once = Once::new();
 
@@ -88,6 +97,7 @@ fn main() {
     let mut value_atomic_time = u128::MAX;
     let mut reference_time = u128::MAX;
     let mut reference_atomic_time = u128::MAX;
+    let mut lazy_static_time = u128::MAX;
 
     for _ in 0..10 {
         let start = std::time::Instant::now();
@@ -117,9 +127,17 @@ fn main() {
             assert_eq!(1, value);
         }
         value_atomic_time = std::cmp::min(value_atomic_time, start.elapsed().as_millis());
+
+        let start = std::time::Instant::now();
+        for _ in 0..100000000 {
+            let value = DICT.get(&1).unwrap();
+            assert_eq!(1, *value);
+        }
+        lazy_static_time = std::cmp::min(lazy_static_time, start.elapsed().as_millis());
     }
     println!("OnceLock = elapsed {} ms", reference_time);
     println!("Atomic reference = elapsed {} ms", reference_atomic_time);
     println!("Once = elapsed {} ms", value_time);
     println!("Atomic value = elapsed {} ms", value_atomic_time);
+    println!("Lazy lock = elapsed {} ms", lazy_static_time);
 }
